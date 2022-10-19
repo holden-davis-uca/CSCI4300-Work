@@ -1,2 +1,1 @@
-# CSCI4300-Work
-Labs and Projects - CSCI 4300 - CRN 22807
+# Labs and Projects done for CSCI 4300 - Operating Systems
