@@ -1,0 +1,3 @@
+﻿  CreateThread.cpp
+C:\Users\holde\source\repos\CreateThread\CreateThread.cpp(21,17): warning C4244: '=': conversion from 'double' to 'DWORD', possible loss of data
+  CreateThread.vcxproj -> C:\Users\holde\source\repos\CreateThread\x64\Debug\CreateThread.exe
