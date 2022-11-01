@@ -1,37 +1,18 @@
-import socket
-import tkinter as tk
+import sys
+import pygame
+pygame.init()
+
+width = 1024
+height = 768
+pygame.display.set_caption("Manager")
+managerscreen = pygame.display.set_mode((width, height))
+managerscreen.fill((128, 128, 128))
 
 
-def getip():
-    dummy = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    dummy.connect(("8.8.8.8", 80))
-    return dummy.getsockname()[0]
 
-
-def run():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((getip(), 6969))
-    s.listen()
-    print("Listening on 6969...")
-    connection, client = s.accept()
-    print(client, "connected!")
-    data = connection.recv(1024)
-    print("Received", data)
-    # print("STARTING MANAGER")
-    # port = input("Enter port: ")
-    # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # s.bind((getip(), int(port)))
-    # s.listen()
-    # print("Listening on", port, "...")
-    # connection, client = s.accept()
-    # print(client, "connected!")
-    # data = connection.recv(1024)
-    # print("Received", data)
-    # print("STOPPING MANAGER")
-
-
-if __name__ == '__main__':
-    root = tk.Tk()
-    here = tk.Button(text="lmao", command=run)
-    here.pack()
-    root.mainloop()
+while True:
+    for e in pygame.event.get():
+        if e.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+    pygame.display.update()
