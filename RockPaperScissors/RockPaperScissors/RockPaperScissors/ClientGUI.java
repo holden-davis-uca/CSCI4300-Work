@@ -14,6 +14,7 @@ import java.awt.Panel;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import javax.swing.JButton;
 
 public class ClientGUI extends JFrame {
 	public JTextField IPField;
@@ -25,6 +26,7 @@ public class ClientGUI extends JFrame {
 	public BufferedImage paper;
 	public BufferedImage scissors;
 	public BufferedImage waiting;
+	public JButton ConnectionButton;
 	
 	public ClientGUI() {
 		
@@ -35,7 +37,6 @@ public class ClientGUI extends JFrame {
 			waiting = ImageIO.read(new File("Assets/waiting.svg"));
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -62,9 +63,20 @@ public class ClientGUI extends JFrame {
 		JLabel ConnectionLabel = new JLabel("Server Connection Status: ");
 		InfoPanel.add(ConnectionLabel);
 		
-		StatusLabel = new JLabel("STATUS");
-		StatusLabel.setForeground(Color.GREEN);
+		StatusLabel = new JLabel("DISCONNECTED");
+		StatusLabel.setForeground(Color.RED);
 		InfoPanel.add(StatusLabel);
+		
+		Panel ConnectionPanel = new Panel();
+		GridBagConstraints gbc_ConnectionPanel = new GridBagConstraints();
+		gbc_ConnectionPanel.gridheight = 2;
+		gbc_ConnectionPanel.insets = new Insets(0, 0, 5, 5);
+		gbc_ConnectionPanel.gridx = 1;
+		gbc_ConnectionPanel.gridy = 1;
+		MasterPanel.add(ConnectionPanel, gbc_ConnectionPanel);
+		
+		ConnectionButton = new JButton("Connect");
+		ConnectionPanel.add(ConnectionButton);
 		
 		JPanel IPPanel = new JPanel();
 		GridBagConstraints gbc_IPPanel = new GridBagConstraints();
@@ -136,8 +148,8 @@ public class ClientGUI extends JFrame {
 		gbc_OpponentStatusLabel.gridy = 0;
 		GamePanel.add(OpponentStatusLabel, gbc_OpponentStatusLabel);
 		
-		OpponentStatus = new JLabel("STATUS");
-		OpponentStatus.setForeground(Color.GREEN);
+		OpponentStatus = new JLabel("NONE");
+		OpponentStatus.setForeground(Color.RED);
 		GridBagConstraints gbc_OpponentStatus = new GridBagConstraints();
 		gbc_OpponentStatus.insets = new Insets(0, 0, 5, 5);
 		gbc_OpponentStatus.anchor = GridBagConstraints.NORTHWEST;
