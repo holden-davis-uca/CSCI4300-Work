@@ -5,3 +5,13 @@
 /ClientGUI$1.class
 /Client$1.class
 /Manager$1.class
+/RPSGame.class
+/RPSPlayer.class
+/ManagerCLI.class
+/ClientCLI.class
+/ConnectedClient.class
+/ManagerCLI$ConnectedClient.class
+/RPSGame$ConnectedClient.class
+/RPSGame2.class
+/CLIENT2.class
+/MANAGER2.class
