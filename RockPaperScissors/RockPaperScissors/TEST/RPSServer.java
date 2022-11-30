@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
 
@@ -23,6 +24,7 @@ public class RPSServer {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					if (!running) {
+						System.out.println("RPSServer() - Connect button selected, starting server");
 						socket = new ServerSocket(Integer.parseInt(gui.PortField.getText()));
 						if (!socket.isClosed())
 							running = true;
@@ -30,6 +32,7 @@ public class RPSServer {
 						gui.InfoLabel.setText("Server Started");
 						gui.PortField.setEditable(false);
 					} else {
+						System.out.println("RPSServer() - Connect button selected, stopping server");
 						socket.close();
 						running = false;
 						gui.ConnectButton.setText("Start Server");
@@ -37,6 +40,7 @@ public class RPSServer {
 						gui.PortField.setEditable(true);
 					}
 				} catch (Exception ex) {
+					System.out.println("RPSServer() - Unknown connection error");
 					gui.InfoLabel.setText("Connection error");
 					ex.printStackTrace();
 				}
@@ -45,22 +49,24 @@ public class RPSServer {
 	}
 
 	public static void main(String[] args) throws Exception {
-		System.out.println("SERVER PROGRAM STARTED");
+		System.out.println("main() - SERVER PROGRAM STARTED");
 		RPSServer server = new RPSServer();
-		try {
-			while (server.gui.isVisible()) {
-				if (server.running) {
-					Game game = new Game();
-					Game.Player player1 = game.new Player(server.socket.accept(), 1);
-					Game.Player player2 = game.new Player(server.socket.accept(), 2);
-					player1.setOpponent(player1);
-					player2.setOpponent(player1);
-					player1.start();
-					player2.start();
-				}
+		//
+		server.gui.PortField.setText("7274");
+		server.gui.ConnectButton.doClick();
+		//
+		while (true) {
+			if (server.running) {
+				System.out.println("main() - Server started and running - creating game instance");
+				Game game = new Game();
+				Game.Player player1 = game.new Player(server.socket.accept(), 1);
+				Game.Player player2 = game.new Player(server.socket.accept(), 2);
+				player1.setOpponent(player2);
+				player2.setOpponent(player1);
+				player1.start();
+				player2.start();
 			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
+			TimeUnit.SECONDS.sleep(1);
 		}
 	}
 }
@@ -72,23 +78,30 @@ class Game {
 
 	public boolean hasWinner(int playernum) {
 		if (playernum == 1) {
+			System.out.println("hasWinner() - Did player " + playernum + " win: " + (this.p1move == 'R' && this.p2move == 'S' || this.p1move == 'P' && this.p2move == 'R'
+					|| this.p1move == 'S' && this.p2move == 'P'));
 			return (this.p1move == 'R' && this.p2move == 'S' || this.p1move == 'P' && this.p2move == 'R'
 					|| this.p1move == 'S' && this.p2move == 'P');
 		} else
+			System.out.println("hasWinner() - Did player " + playernum + " win: " + (this.p2move == 'R' && this.p1move == 'S' || this.p2move == 'P' && this.p1move == 'R'
+					|| this.p2move == 'S' && this.p1move == 'P'));
 			return (this.p2move == 'R' && this.p1move == 'S' || this.p2move == 'P' && this.p1move == 'R'
 					|| this.p2move == 'S' && this.p1move == 'P');
 	}
 
 	public boolean tied() {
+		System.out.println("tied() - Tie: " + (p1move == 'R' && p2move == 'R' || p1move == 'P' && p2move == 'P' || p1move == 'S' && p2move == 'S'));
 		return (p1move == 'R' && p2move == 'R' || p1move == 'P' && p2move == 'P' || p1move == 'S' && p2move == 'S');
 	}
 
-	public void shoot(Player player, char decision) {
+	public boolean shoot(Player player, char decision) {
+		System.out.println("shoot() - Player " + player.playernumber + " just moved " + decision);
 		if (player.playernumber == 1)
 			p1move = decision;
 		else
 			p2move = decision;
-		player.otherPlayerMoved();
+		player.opponent.otherPlayerMoved();
+		return true;
 	}
 
 	class Player extends Thread {
@@ -99,16 +112,13 @@ class Game {
 		PrintWriter out;
 
 		public Player(Socket socket, int number) {
-			System.out.println("PLAYER " + number + "CONNECTED");
+			System.out.println("PLAYER " +  this.playernumber +  " THREAD ==> Player() - Player connected, assigning player number " + number);
 			this.socket = socket;
 			this.playernumber = number;
 			try {
 				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				out = new PrintWriter(socket.getOutputStream());
-				out.println("PLAYER " + number);
-				System.out.println("PLAYER " + number);
-				out.println("WAIT");
-				System.out.println("WAIT");
+				out = new PrintWriter(socket.getOutputStream(), true);
+				out.println("N" + number);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -120,23 +130,23 @@ class Game {
 
 		public void otherPlayerMoved() {
 			out.println("O");
-			System.out.println("O");
-			out.println(hasWinner(this.playernumber) ? "W" : tied() ? "T" : "D");
-			System.out.println(hasWinner(this.playernumber) ? "W" : tied() ? "T" : "D");
+			out.println(hasWinner(this.playernumber) ? "D" : tied() ? "T" : "W");
+			System.out.println("PLAYER " +  this.playernumber +  " THREAD ==> otherPlayerMoved() - " + this.playernumber + " win: " + (hasWinner(this.playernumber) ? "D" : tied() ? "T" : ""));
 		}
 
 		public void run() {
 			try {
-				out.println("READY");
-				System.out.println("READY");
+				out.println("G");
+				System.out.println("PLAYER " +  this.playernumber +  " THREAD ==> run() - Sending Go sequence to player " + this.playernumber);
 				while (true) {
 					String move = in.readLine();
-					System.out.println(move);
 					if (move.startsWith("M")) {
-						shoot(this, move.charAt(1));
-						out.println(hasWinner(this.playernumber) ? "W" : tied() ? "T" : "D");
-						System.out.println(hasWinner(this.playernumber) ? "W" : tied() ? "T" : "D");
+						if (shoot(this, move.charAt(1))) {
+							System.out.println("PLAYER " +  this.playernumber +  " THREAD ==> run()  - Player " + this.playernumber + " chose " + move.charAt(1));
+							out.println(hasWinner(this.playernumber) ? "W" : tied() ? "T" : "D");
+						}
 					} else if (move.startsWith("Q"))
+						System.out.println("PLAYER " +  this.playernumber +  " THREAD ==> run()  - Player " + this.playernumber + " chose to quit");
 						return;
 				}
 			} catch (Exception e) {
