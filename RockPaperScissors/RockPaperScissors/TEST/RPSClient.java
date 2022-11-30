@@ -24,35 +24,52 @@ public class RPSClient {
 		gui.ConnectButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					if (!connected)
-					{
+					if (!connected) {
 						socket = new Socket(gui.IPField.getText(), Integer.parseInt(gui.PortField.getText()));
 						in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 						out = new PrintWriter(socket.getOutputStream());
-						if (socket.isConnected()) connected = true;
+						if (socket.isConnected())
+							connected = true;
 						gui.ConnectButton.setText("Disconnect");
 						gui.InfoLabel.setText("Connected");
 						gui.IPField.setEditable(false);
 						gui.PortField.setEditable(false);
-						gui.PaperButton.setEnabled(true);
-						gui.RockButton.setEnabled(true);
-						gui.ScissorsButton.setEnabled(true);
-					}
-					else {
+					} else {
 						socket.close();
 						connected = false;
 						gui.ConnectButton.setText("Connect");
 						gui.InfoLabel.setText("Disconnected");
 						gui.IPField.setEditable(true);
 						gui.PortField.setEditable(true);
-						gui.PaperButton.setEnabled(false);
-						gui.RockButton.setEnabled(false);
-						gui.ScissorsButton.setEnabled(false);
 					}
 				} catch (Exception ex) {
 					gui.InfoLabel.setText("Connection error");
 					ex.printStackTrace();
 				}
+			}
+		});
+		gui.RockButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				out.println("R");
+				gui.RockButton.setEnabled(false);
+				gui.PaperButton.setEnabled(false);
+				gui.ScissorsButton.setEnabled(false);
+			}
+		});
+		gui.PaperButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				out.println("P");
+				gui.RockButton.setEnabled(false);
+				gui.PaperButton.setEnabled(false);
+				gui.ScissorsButton.setEnabled(false);
+			}
+		});
+		gui.ScissorsButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				out.println("S");
+				gui.RockButton.setEnabled(false);
+				gui.PaperButton.setEnabled(false);
+				gui.ScissorsButton.setEnabled(false);
 			}
 		});
 	}
@@ -61,19 +78,26 @@ public class RPSClient {
 		String serverresponse;
 		try {
 			serverresponse = in.readLine();
+			System.out.println(serverresponse);
 			if (serverresponse.startsWith("PLAYER")) {
 				this.playernumber = serverresponse.charAt(6);
+				gui.InfoLabel.setText("Connected - Waiting for Opponent");
 			}
 			while (true) {
 				serverresponse = in.readLine();
 				System.out.println(serverresponse);
-				// VALID MOVE - no need to know, just draw client side
-				// OPPONENT MOVED
-				// VICTORY
-				// DEFEAT
-				// TIE
-				// MESSAGE
-				break;
+				if (serverresponse.startsWith("READY")) {
+					gui.InfoLabel.setText("Opponent Connected - Go!");
+				} else if (serverresponse.startsWith("W")) {
+					gui.InfoLabel.setText("Victory!");
+					break;
+				} else if (serverresponse.startsWith("D")) {
+					gui.InfoLabel.setText("Defeat!");
+					break;
+				} else if (serverresponse.startsWith("T")) {
+					gui.InfoLabel.setText("Tie!");
+					break;
+				}
 			}
 			out.println("Q");
 			System.out.println("Q");
@@ -89,12 +113,20 @@ public class RPSClient {
 	}
 
 	public static void main(String[] args) throws Exception {
-			RPSClient client = new RPSClient();
-			while (client.connected) {
+		System.out.println("CLIENT PROGRAM STARTED");
+		RPSClient client = new RPSClient();
+		while (client.gui.isVisible()) {
+			if (client.connected) {
 				client.play();
 				if (!client.rematch()) {
 					break;
+				} else {
+					client.gui.RockButton.setEnabled(true);
+					client.gui.PaperButton.setEnabled(true);
+					client.gui.ScissorsButton.setEnabled(true);
+					client.gui.InfoLabel.setText("Go!");
 				}
 			}
 		}
 	}
+}

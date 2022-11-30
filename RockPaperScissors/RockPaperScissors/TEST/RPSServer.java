@@ -16,21 +16,20 @@ public class RPSServer {
 	private ServerSocket socket;
 	private boolean running;
 
-	public RPSServer() throws Exception{
+	public RPSServer() throws Exception {
 		gui = new ServerGUI2();
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gui.ConnectButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					if (!running)
-					{
+					if (!running) {
 						socket = new ServerSocket(Integer.parseInt(gui.PortField.getText()));
-						if (socket.isBound()) running = true;
+						if (!socket.isClosed())
+							running = true;
 						gui.ConnectButton.setText("Stop Server");
 						gui.InfoLabel.setText("Server Started");
 						gui.PortField.setEditable(false);
-					}
-					else {
+					} else {
 						socket.close();
 						running = false;
 						gui.ConnectButton.setText("Start Server");
@@ -44,18 +43,21 @@ public class RPSServer {
 			}
 		});
 	}
-	
+
 	public static void main(String[] args) throws Exception {
+		System.out.println("SERVER PROGRAM STARTED");
 		RPSServer server = new RPSServer();
 		try {
-			while (server.running) {
-				Game game = new Game();
-				Game.Player player1 = game.new Player(server.socket.accept(), 1);
-				Game.Player player2 = game.new Player(server.socket.accept(), 2);
-				player1.setOpponent(player1);
-				player2.setOpponent(player1);
-				player1.start();
-				player2.start();
+			while (server.gui.isVisible()) {
+				if (server.running) {
+					Game game = new Game();
+					Game.Player player1 = game.new Player(server.socket.accept(), 1);
+					Game.Player player2 = game.new Player(server.socket.accept(), 2);
+					player1.setOpponent(player1);
+					player2.setOpponent(player1);
+					player1.start();
+					player2.start();
+				}
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -97,6 +99,7 @@ class Game {
 		PrintWriter out;
 
 		public Player(Socket socket, int number) {
+			System.out.println("PLAYER " + number + "CONNECTED");
 			this.socket = socket;
 			this.playernumber = number;
 			try {
@@ -116,8 +119,8 @@ class Game {
 		}
 
 		public void otherPlayerMoved() {
-			out.println("OPPONENT MOVED");
-			System.out.println("OPPONENT MOVED");
+			out.println("O");
+			System.out.println("O");
 			out.println(hasWinner(this.playernumber) ? "W" : tied() ? "T" : "D");
 			System.out.println(hasWinner(this.playernumber) ? "W" : tied() ? "T" : "D");
 		}
@@ -128,6 +131,7 @@ class Game {
 				System.out.println("READY");
 				while (true) {
 					String move = in.readLine();
+					System.out.println(move);
 					if (move.startsWith("M")) {
 						shoot(this, move.charAt(1));
 						out.println(hasWinner(this.playernumber) ? "W" : tied() ? "T" : "D");
