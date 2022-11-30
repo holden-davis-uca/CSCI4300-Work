@@ -6,11 +6,11 @@ import java.net.Socket;
 
 public class Client {
 
-	public static ClientGUI gui;
+	public static ClientGUI2 gui;
 	
 	public static void main(String[] args) {
 		
-		gui = new ClientGUI();
+		gui = new ClientGUI2();
 		gui.setTitle("Rock Paper Scissors - Client");
 		gui.setSize(1000, 700);
 		gui.setResizable(false);
