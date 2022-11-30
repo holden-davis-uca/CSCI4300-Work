@@ -59,6 +59,8 @@ public class RPSServer {
 			if (server.running) {
 				System.out.println("main() - Server started and running - creating game instance");
 				Game game = new Game();
+				game.p1move = 'Z';
+				game.p2move = 'Z';
 				Game.Player player1 = game.new Player(server.socket.accept(), 1);
 				Game.Player player2 = game.new Player(server.socket.accept(), 2);
 				player1.setOpponent(player2);
@@ -73,25 +75,23 @@ public class RPSServer {
 
 class Game {
 
-	private char p1move;
-	private char p2move;
+	public char p1move;
+	public char p2move;
 
-	public boolean hasWinner(int playernum) {
+	public boolean winner(int playernum) {
 		if (playernum == 1) {
-			System.out.println("hasWinner() - Did player " + playernum + " win: " + (this.p1move == 'R' && this.p2move == 'S' || this.p1move == 'P' && this.p2move == 'R'
-					|| this.p1move == 'S' && this.p2move == 'P'));
-			return (this.p1move == 'R' && this.p2move == 'S' || this.p1move == 'P' && this.p2move == 'R'
-					|| this.p1move == 'S' && this.p2move == 'P');
+			return ((this.p1move == 'R' && this.p2move == 'S') || (this.p1move == 'P' && this.p2move == 'R')
+					|| (this.p1move == 'S' && this.p2move == 'P'));
 		} else
-			System.out.println("hasWinner() - Did player " + playernum + " win: " + (this.p2move == 'R' && this.p1move == 'S' || this.p2move == 'P' && this.p1move == 'R'
-					|| this.p2move == 'S' && this.p1move == 'P'));
-			return (this.p2move == 'R' && this.p1move == 'S' || this.p2move == 'P' && this.p1move == 'R'
-					|| this.p2move == 'S' && this.p1move == 'P');
+			return ((this.p2move == 'R' && this.p1move == 'S') || (this.p2move == 'P' && this.p1move == 'R')
+					|| (this.p2move == 'S' && this.p1move == 'P'));
 	}
 
 	public boolean tied() {
-		System.out.println("tied() - Tie: " + (p1move == 'R' && p2move == 'R' || p1move == 'P' && p2move == 'P' || p1move == 'S' && p2move == 'S'));
-		return (p1move == 'R' && p2move == 'R' || p1move == 'P' && p2move == 'P' || p1move == 'S' && p2move == 'S');
+		System.out.println("tied() - Tie: " + ((p1move == 'R' && p2move == 'R') || (p1move == 'P' && p2move == 'P')
+				|| (p1move == 'S' && p2move == 'S')));
+		return ((p1move == 'R' && p2move == 'R') || (p1move == 'P' && p2move == 'P')
+				|| (p1move == 'S' && p2move == 'S'));
 	}
 
 	public boolean shoot(Player player, char decision) {
@@ -104,6 +104,10 @@ class Game {
 		return true;
 	}
 
+	public boolean bothMoved() {
+		return p1move != 'Z' && p2move != 'Z';
+	}
+
 	class Player extends Thread {
 		int playernumber;
 		Player opponent;
@@ -112,7 +116,6 @@ class Game {
 		PrintWriter out;
 
 		public Player(Socket socket, int number) {
-			System.out.println("PLAYER " +  this.playernumber +  " THREAD ==> Player() - Player connected, assigning player number " + number);
 			this.socket = socket;
 			this.playernumber = number;
 			try {
@@ -129,25 +132,44 @@ class Game {
 		}
 
 		public void otherPlayerMoved() {
-			out.println("O");
-			out.println(hasWinner(this.playernumber) ? "D" : tied() ? "T" : "W");
-			System.out.println("PLAYER " +  this.playernumber +  " THREAD ==> otherPlayerMoved() - " + this.playernumber + " win: " + (hasWinner(this.playernumber) ? "D" : tied() ? "T" : ""));
+			this.opponent.out.println("O");
+			if (bothMoved()) {
+				if (tied()) {
+					out.println("D");
+					this.opponent.out.println("D");
+				} else {
+					out.println(winner(this.playernumber) ? "W" : "D");
+					this.opponent.out.println(winner(this.opponent.playernumber) ? "W" : "D");
+				}
+			}
+
 		}
 
 		public void run() {
 			try {
 				out.println("G");
-				System.out.println("PLAYER " +  this.playernumber +  " THREAD ==> run() - Sending Go sequence to player " + this.playernumber);
+				System.out.println("PLAYER " + this.playernumber + " THREAD ==> run() - Sending Go sequence to player "
+						+ this.playernumber);
 				while (true) {
 					String move = in.readLine();
 					if (move.startsWith("M")) {
 						if (shoot(this, move.charAt(1))) {
-							System.out.println("PLAYER " +  this.playernumber +  " THREAD ==> run()  - Player " + this.playernumber + " chose " + move.charAt(1));
-							out.println(hasWinner(this.playernumber) ? "W" : tied() ? "T" : "D");
+							System.out.println("PLAYER " + this.playernumber + " THREAD ==> run()  - Player "
+									+ this.playernumber + " chose " + move.charAt(1));
+							if (bothMoved()) {
+								if (tied()) {
+									out.println("D");
+									this.opponent.out.println("D");
+								} else {
+									out.println(winner(this.playernumber) ? "W" : "D");
+									this.opponent.out.println(winner(this.opponent.playernumber) ? "W" : "D");
+								}
+							}
 						}
 					} else if (move.startsWith("Q"))
-						System.out.println("PLAYER " +  this.playernumber +  " THREAD ==> run()  - Player " + this.playernumber + " chose to quit");
-						return;
+						System.out.println("PLAYER " + this.playernumber + " THREAD ==> run()  - Player "
+								+ this.playernumber + " chose to quit");
+					return;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
