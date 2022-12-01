@@ -100,7 +100,7 @@ class Game {
 			p1move = decision;
 		else
 			p2move = decision;
-		player.opponent.otherPlayerMoved();
+		player.otherPlayerMoved(player.opponent);
 		return true;
 	}
 
@@ -131,18 +131,15 @@ class Game {
 			this.opponent = opponent;
 		}
 
-		public void otherPlayerMoved() {
-			this.opponent.out.println("O");
-			if (bothMoved()) {
+		public void otherPlayerMoved(Player player) {
+			player.out.println("O");
+//			if (bothMoved()) {
 				if (tied()) {
-					out.println("D");
-					this.opponent.out.println("D");
+					player.out.println("T");
 				} else {
-					out.println(winner(this.playernumber) ? "W" : "D");
-					this.opponent.out.println(winner(this.opponent.playernumber) ? "W" : "D");
+					player.out.println(winner(this.playernumber) ? "W" : "D");
 				}
-			}
-
+//			}
 		}
 
 		public void run() {
@@ -156,15 +153,13 @@ class Game {
 						if (shoot(this, move.charAt(1))) {
 							System.out.println("PLAYER " + this.playernumber + " THREAD ==> run()  - Player "
 									+ this.playernumber + " chose " + move.charAt(1));
-							if (bothMoved()) {
+//							if (bothMoved()) {
 								if (tied()) {
-									out.println("D");
-									this.opponent.out.println("D");
+									out.println("T");
 								} else {
 									out.println(winner(this.playernumber) ? "W" : "D");
-									this.opponent.out.println(winner(this.opponent.playernumber) ? "W" : "D");
 								}
-							}
+//							}
 						}
 					} else if (move.startsWith("Q"))
 						System.out.println("PLAYER " + this.playernumber + " THREAD ==> run()  - Player "
