@@ -125,8 +125,8 @@ public class RPSClient {
 					}
 				}
 			}
-			System.out.println("play() - sending server Q");
-			out.println("Q");
+			//System.out.println("play() - sending server Q");
+			//out.println("Q");
 		} finally {
 			socket.close();
 		}

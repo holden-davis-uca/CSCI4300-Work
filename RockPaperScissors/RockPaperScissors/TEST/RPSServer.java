@@ -97,9 +97,13 @@ class Game {
 	public boolean shoot(Player player, char decision) {
 		System.out.println("shoot() - Player " + player.playernumber + " just moved " + decision);
 		if (player.playernumber == 1)
+		{
 			p1move = decision;
+		}
 		else
+		{
 			p2move = decision;
+		}
 		player.otherPlayerMoved(player.opponent);
 		return true;
 	}
@@ -133,13 +137,13 @@ class Game {
 
 		public void otherPlayerMoved(Player player) {
 			player.out.println("O");
-//			if (bothMoved()) {
+			if (bothMoved()) {
 				if (tied()) {
 					player.out.println("T");
 				} else {
-					player.out.println(winner(this.playernumber) ? "W" : "D");
+					player.out.println(winner(player.playernumber) ? "W" : "D");
 				}
-//			}
+			}
 		}
 
 		public void run() {
@@ -153,13 +157,13 @@ class Game {
 						if (shoot(this, move.charAt(1))) {
 							System.out.println("PLAYER " + this.playernumber + " THREAD ==> run()  - Player "
 									+ this.playernumber + " chose " + move.charAt(1));
-//							if (bothMoved()) {
+							if (bothMoved()) {
 								if (tied()) {
 									out.println("T");
 								} else {
 									out.println(winner(this.playernumber) ? "W" : "D");
 								}
-//							}
+							}
 						}
 					} else if (move.startsWith("Q"))
 						System.out.println("PLAYER " + this.playernumber + " THREAD ==> run()  - Player "
@@ -168,12 +172,6 @@ class Game {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-			} finally {
-				try {
-					socket.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
 			}
 		}
 	}
