@@ -14,7 +14,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.FlowLayout;
 
-public class ClientGUI2 extends JFrame {
+public class ClientGUI extends JFrame {
 	
 	public JTextField IPField;
 	public JTextField PortField;
@@ -24,7 +24,7 @@ public class ClientGUI2 extends JFrame {
 	public JButton PaperButton;
 	public JButton RockButton;
 	
-	public ClientGUI2() {
+	public ClientGUI() {
 		
 		JPanel mainPanel = new JPanel();
 		getContentPane().add(mainPanel, BorderLayout.CENTER);

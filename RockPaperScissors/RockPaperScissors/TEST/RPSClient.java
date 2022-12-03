@@ -12,7 +12,7 @@ import javax.swing.JOptionPane;
 
 public class RPSClient {
 
-	private ClientGUI2 gui;
+	private ClientGUI gui;
 	private Socket socket;
 	private BufferedReader in;
 	private PrintWriter out;
@@ -20,7 +20,7 @@ public class RPSClient {
 	private boolean connected;
 
 	public RPSClient() throws Exception {
-		gui = new ClientGUI2();
+		gui = new ClientGUI();
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gui.ConnectButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -38,7 +38,6 @@ public class RPSClient {
 						gui.PortField.setEditable(false);
 					} else {
 						System.out.println("RPSClient() - Connect button selected, disconnecting from server");
-						socket.close();
 						connected = false;
 						gui.ConnectButton.setText("Connect");
 						gui.InfoLabel.setText("Disconnected");
@@ -97,8 +96,7 @@ public class RPSClient {
 			}
 			while (true) {
 				serverresponse = in.readLine();
-				if (serverresponse != null)
-				{
+				if (serverresponse != null) {
 					System.out.println("play() - server sent " + serverresponse);
 					if (serverresponse.startsWith("G")) {
 						System.out.println("play() - server sent G");
@@ -125,16 +123,15 @@ public class RPSClient {
 					}
 				}
 			}
-			//System.out.println("play() - sending server Q");
-			//out.println("Q");
-		} finally {
-			socket.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
 	private boolean rematch() {
 		System.out.println("rematch() - Prompting");
-		int response = JOptionPane.showConfirmDialog(gui, "Do you wish to play again?", "Rematch", JOptionPane.YES_NO_OPTION);
+		int response = JOptionPane.showConfirmDialog(gui, "Do you wish to play again?", "Rematch",
+				JOptionPane.YES_NO_OPTION);
 		return response == JOptionPane.YES_OPTION;
 	}
 
@@ -152,6 +149,7 @@ public class RPSClient {
 				client.play();
 				if (!client.rematch()) {
 					System.out.println("main() - user declined rematch");
+					client.out.println("Q");
 					break;
 				} else {
 					System.out.println("main() - user accepted rematch");

@@ -13,12 +13,12 @@ import javax.swing.JFrame;
 
 public class RPSServer {
 
-	private ServerGUI2 gui;
+	private ServerGUI gui;
 	private ServerSocket socket;
 	private boolean running;
 
 	public RPSServer() throws Exception {
-		gui = new ServerGUI2();
+		gui = new ServerGUI();
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gui.ConnectButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -96,12 +96,9 @@ class Game {
 
 	public boolean shoot(Player player, char decision) {
 		System.out.println("shoot() - Player " + player.playernumber + " just moved " + decision);
-		if (player.playernumber == 1)
-		{
+		if (player.playernumber == 1) {
 			p1move = decision;
-		}
-		else
-		{
+		} else {
 			p2move = decision;
 		}
 		player.otherPlayerMoved(player.opponent);
@@ -165,10 +162,13 @@ class Game {
 								}
 							}
 						}
-					} else if (move.startsWith("Q"))
+					} else if (move.startsWith("Q")) {
+						this.socket.close();
 						System.out.println("PLAYER " + this.playernumber + " THREAD ==> run()  - Player "
 								+ this.playernumber + " chose to quit");
-					return;
+						return;
+					}
+
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
